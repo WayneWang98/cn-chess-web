@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
+import { sharpSites, record, chessDictionary } from './store'
 
 class ChessBoard extends Component {
   render () {
@@ -7,6 +8,7 @@ class ChessBoard extends Component {
       <div>
         <ChessBoardContainer>
           <canvas ref={this.boardCanvas} width="500" height="600"></canvas>
+          <canvas className='chessCanvas' ref={this.chessCanvas} width="500" height="600"></canvas>
         </ChessBoardContainer>
       </div>
     )
@@ -14,8 +16,10 @@ class ChessBoard extends Component {
 
   constructor () {
     super()
-    this.boardCanvas = React.createRef()
+    this.boardCanvas = React.createRef() // 棋盘画布
+    this.chessCanvas = React.createRef() // 棋子画布
     this.cellWidth = 50
+    this.radius = 22 // 棋子半径
     this.sharpSize = this.cellWidth / 4
     this.offsetX = 50 // 棋盘相对于画布的偏移量
     this.offsetY = 50
@@ -24,9 +28,14 @@ class ChessBoard extends Component {
   componentDidMount () {
     /** @type {HTMLCanvasElement} */ 
     const boardCanvas = this.boardCanvas.current // 获取真实的canvas
+    const chessCanvas = this.chessCanvas.current
     if (boardCanvas.getContext) {
       let ctx = boardCanvas.getContext('2d')
       this.drawChessBoard(ctx)
+    }
+    if (chessCanvas.getContext) {
+      let ctx = chessCanvas.getContext('2d')
+      this.drawSituation(ctx)
     }
   }
 
@@ -140,19 +149,47 @@ class ChessBoard extends Component {
     this.drawLineInBoard(ctx, 3 * cellWidth, 7 * cellWidth, 5 * cellWidth, 9 * cellWidth)
     this.drawLineInBoard(ctx, 3 * cellWidth, 9 * cellWidth, 5 * cellWidth, 7 * cellWidth)
   }
-}
 
-const sharpSites = [ // “#”辅助数组
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 1, 0],
-  [1, 0, 1, 0, 1, 0, 1, 0, 1],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [1, 0, 1, 0, 1, 0, 1, 0, 1],
-  [0, 1, 0, 0, 0, 0, 0, 1, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 0, 0]
-]
+  // 绘制一个棋子
+  drawChess (ctx, x, y, color, chess) {
+    const { cellWidth, radius } = this
+    const text = chess.name
+    this.drawCircle(ctx, x * cellWidth, y * cellWidth, radius, color, text) 
+  }
+
+  // 绘制一个圆
+  drawCircle (ctx, x, y, r, color, text) {
+    const { offsetX, offsetY } = this
+    ctx.beginPath()
+    ctx.arc(offsetX + x, offsetY + y, r, 0, 2 * Math.PI, false)
+    ctx.closePath()
+    ctx.lineStyle = color
+    ctx.fillStyle = '#fff'
+    ctx.fill()
+
+    if (text) {
+      ctx.font = 'bold 22px Courier New'
+      ctx.fillStyle = color
+      ctx.fillText(text , offsetX + x - 12, offsetY + y + 8)
+    }
+    
+    ctx.stroke()
+  }
+
+  // 绘制一个完整的局面
+  drawSituation (ctx) {
+    record.forEach((line, row) => {
+      line.forEach((site, col) => {
+        if (site !== '0') { // 该位置有棋子
+          if (site >= 'a' && site <= 'z') { // 黑棋
+            this.drawChess(ctx, col, row, 'black', chessDictionary[site])
+          } else { // 红棋
+            this.drawChess(ctx, col, row, 'red', chessDictionary[site])
+          }
+        }
+      })
+    })
+  }
+}
 
 export default ChessBoard

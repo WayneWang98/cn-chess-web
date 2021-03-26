@@ -1,14 +1,15 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { sharpSites, record, chessDictionary } from './store'
+import { getCanvasPixelRatio, canvasCalculator } from '../../utils'
 
 class ChessBoard extends Component {
   render () {
     return (
       <div>
         <ChessBoardContainer>
-          <canvas ref={this.boardCanvas} width="500" height="600"></canvas>
-          <canvas className='chessCanvas' ref={this.chessCanvas} width="500" height="600"></canvas>
+          <canvas className="boardCanvas" ref={this.boardCanvas} width="625" height="750"></canvas>
+          <canvas className="chessCanvas" ref={this.chessCanvas} width="625" height="750"></canvas>
         </ChessBoardContainer>
       </div>
     )
@@ -18,6 +19,7 @@ class ChessBoard extends Component {
     super()
     this.boardCanvas = React.createRef() // 棋盘画布
     this.chessCanvas = React.createRef() // 棋子画布
+    this.ratio =  1 // 画布缩放比
     this.cellWidth = 50
     this.radius = 22 // 棋子半径
     this.sharpSize = this.cellWidth / 4
@@ -31,12 +33,57 @@ class ChessBoard extends Component {
     const chessCanvas = this.chessCanvas.current
     if (boardCanvas.getContext) {
       let ctx = boardCanvas.getContext('2d')
+      this.ratio = getCanvasPixelRatio(ctx) || 1 // 获取画布缩放比
+      ctx.scale(this.ratio, this.ratio)
       this.drawChessBoard(ctx)
     }
+    let chessCtx
     if (chessCanvas.getContext) {
-      let ctx = chessCanvas.getContext('2d')
-      this.drawSituation(ctx)
+      chessCtx = chessCanvas.getContext('2d')
+      chessCtx.scale(this.ratio, this.ratio)
+      this.drawSituation(chessCtx)
     }
+
+    chessCanvas.onclick = (e) => {
+      const { cellWidth }  = this
+      const { offsetX, offsetY } = e
+      const point = { x: offsetX, y: offsetY}
+
+      const x = parseInt(offsetX / cellWidth) * cellWidth // 放大
+      const y = parseInt(offsetY / cellWidth) * cellWidth
+      
+      const A1 = { x: x, y: y }
+      const A2 = { x: x + cellWidth, y: y }
+      const B1 = { x: x, y: y + cellWidth }
+      const B2 = { x: x + cellWidth, y: y + cellWidth }
+
+      let minPoint = canvasCalculator.getMinDistancePoint(point, [A1, A2, B1, B2])
+      const col = minPoint.x / cellWidth - 1, row = minPoint.y / cellWidth - 1
+      if (col < 0 || col > 8 || row < 0 || row > 9) { // 在棋盘不合法范围内
+        return
+      }
+      if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
+        console.log(chessDictionary[record[row][col]])
+        this.drawSelector(chessCtx, row, col)
+      }
+    }
+  }
+
+  // 绘制选中棋子的标志
+  drawSelector (ctx, x, y) {
+    const { radius } = this
+    this.drawLineInChessCanvas(ctx, x * this.cellWidth - radius, y * this.cellWidth - radius, x * this.cellWidth, y * this.cellWidth - this.radius)
+  }
+
+  // 画简单直线（在chessCanvas中）
+  drawLineInChessCanvas (ctx, x1, y1, x2, y2) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
+    const { offsetX, offsetY } = this
+    ctx.beginPath()
+    ctx.moveTo(x1 + offsetX, y1 + offsetY)
+    ctx.lineTo(x2 + offsetX, y2 + offsetY)
+    ctx.closePath()
+    ctx.stroke()
+    
   }
 
   // 绘制棋盘
@@ -168,9 +215,9 @@ class ChessBoard extends Component {
     ctx.fill()
 
     if (text) {
-      ctx.font = 'bold 22px Courier New'
+      ctx.font = '30px LiSu'
       ctx.fillStyle = color
-      ctx.fillText(text , offsetX + x - 12, offsetY + y + 8)
+      ctx.fillText(text , offsetX + x - 15, offsetY + y + 8)
     }
     
     ctx.stroke()

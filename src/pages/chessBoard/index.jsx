@@ -25,6 +25,9 @@ class ChessBoard extends Component {
     this.sharpSize = this.cellWidth / 4
     this.offsetX = 50 // 棋盘相对于画布的偏移量
     this.offsetY = 50
+    this.checkedChess = null // 被选中的棋子
+    this.checkedX = -1 // 选中的棋子的位置
+    this.checkedY = -1
   }
 
   componentDidMount () {
@@ -62,9 +65,29 @@ class ChessBoard extends Component {
       if (col < 0 || col > 8 || row < 0 || row > 9) { // 在棋盘不合法范围内
         return
       }
-      if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
-        console.log(chessDictionary[record[row][col]])
+
+      if (this.checkedChess) { // 已经有棋子被选中了，此时只能是落子或者切换棋子
+        
+        let key = record[this.checkedY][this.checkedX]
+        record[this.checkedY][this.checkedX] = '0'
+        record[row][col] = key
+        chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+        this.drawSituation(chessCtx)
         this.drawSelector(chessCtx, col, row)
+        
+        this.checkedChess = null
+      } else { // 选棋子
+        if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
+          const chess = chessDictionary[record[row][col]]
+          if (chess !== undefined) {
+            chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+            this.drawSituation(chessCtx)
+            this.drawSelector(chessCtx, col, row)
+            this.checkedChess = chess
+            this.checkedX = col
+            this.checkedY = row
+          }
+        }
       }
     }
   }

@@ -64,26 +64,34 @@ class ChessBoard extends Component {
       }
       if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
         console.log(chessDictionary[record[row][col]])
-        this.drawSelector(chessCtx, row, col)
+        this.drawSelector(chessCtx, col, row)
       }
     }
   }
 
   // 绘制选中棋子的标志
-  drawSelector (ctx, x, y) {
-    const { radius } = this
-    this.drawLineInChessCanvas(ctx, x * this.cellWidth - radius, y * this.cellWidth - radius, x * this.cellWidth, y * this.cellWidth - this.radius)
+  drawSelector (ctx, col, row) {
+    const { radius: r, cellWidth } = this
+    const x = col * cellWidth, y = row * cellWidth
+
+    this.drawLineInChessCanvas(ctx, x - r, y - r, x, y -r) // 左上
+    this.drawLineInChessCanvas(ctx, x - r, y - r, x - r, y)
+    this.drawLineInChessCanvas(ctx, x, y - r, x + r, y - r) // 右上
+    this.drawLineInChessCanvas(ctx, x + r, y - r, x + r, y)
+    this.drawLineInChessCanvas(ctx, x- r, y, x - r, y + r) // 左下
+    this.drawLineInChessCanvas(ctx, x - r, y + r, x, y + r)
+    this.drawLineInChessCanvas(ctx, x, y + r, x + r, y + r) // 右下
+    this.drawLineInChessCanvas(ctx, x + r, y , x + r, y + r)
   }
 
-  // 画简单直线（在chessCanvas中）
+  // 画简单直线（在chessCanvas）
   drawLineInChessCanvas (ctx, x1, y1, x2, y2) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
     const { offsetX, offsetY } = this
     ctx.beginPath()
     ctx.moveTo(x1 + offsetX, y1 + offsetY)
-    ctx.lineTo(x2 + offsetX, y2 + offsetY)
+    ctx.lineTo(x2 + offsetX, y2  + offsetY)
     ctx.closePath()
     ctx.stroke()
-    
   }
 
   // 绘制棋盘

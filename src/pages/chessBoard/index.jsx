@@ -19,15 +19,18 @@ class ChessBoard extends Component {
     super()
     this.boardCanvas = React.createRef() // 棋盘画布
     this.chessCanvas = React.createRef() // 棋子画布
+    this.boardCtx = null // 棋盘画布的上下文
+    this.chessCtx = null // 棋子画布的上下文
     this.ratio =  1 // 画布缩放比
-    this.cellWidth = 50
+    this.cellWidth = 50 // 单元格的大小
     this.radius = 22 // 棋子半径
-    this.sharpSize = this.cellWidth / 4
+    this.sharpSize = this.cellWidth / 4 // 棋盘“#”符号的大小
     this.offsetX = 50 // 棋盘相对于画布的偏移量
     this.offsetY = 50
     this.checkedChess = null // 被选中的棋子
     this.checkedX = -1 // 选中的棋子的位置
     this.checkedY = -1
+    this.round = 1 // 回合数
   }
 
   componentDidMount () {
@@ -35,16 +38,16 @@ class ChessBoard extends Component {
     const boardCanvas = this.boardCanvas.current // 获取真实的canvas
     const chessCanvas = this.chessCanvas.current
     if (boardCanvas.getContext) {
-      let ctx = boardCanvas.getContext('2d')
-      this.ratio = getCanvasPixelRatio(ctx) || 1 // 获取画布缩放比
-      ctx.scale(this.ratio, this.ratio)
-      this.drawChessBoard(ctx)
+      let boardCtx = this.boardCtx = boardCanvas.getContext('2d')
+      this.ratio = getCanvasPixelRatio(boardCtx) || 1 // 获取画布缩放比
+      boardCtx.scale(this.ratio, this.ratio)
+      this.drawChessBoard(boardCtx)
     }
     let chessCtx
     if (chessCanvas.getContext) {
-      chessCtx = chessCanvas.getContext('2d')
+      chessCtx = this.chessCtx = chessCanvas.getContext('2d')
       chessCtx.scale(this.ratio, this.ratio)
-      this.drawSituation(chessCtx)
+      this.drawSituation(chessCtx) // 绘制初始局面
     }
 
     chessCanvas.onclick = (e) => {
@@ -67,25 +70,31 @@ class ChessBoard extends Component {
       }
 
       if (this.checkedChess) { // 已经有棋子被选中了，此时只能是落子或者切换棋子
-        
         let key = record[this.checkedY][this.checkedX]
         record[this.checkedY][this.checkedX] = '0'
         record[row][col] = key
         chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
         this.drawSituation(chessCtx)
         this.drawSelector(chessCtx, col, row)
+        this.drawSelector(chessCtx, this.checkedX, this.checkedY)
         
         this.checkedChess = null
       } else { // 选棋子
         if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
-          const chess = chessDictionary[record[row][col]]
+          const chessEng = record[row][col] // 棋子的英文编码
+          const chess = chessDictionary[chessEng]
           if (chess !== undefined) {
-            chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-            this.drawSituation(chessCtx)
-            this.drawSelector(chessCtx, col, row)
-            this.checkedChess = chess
-            this.checkedX = col
-            this.checkedY = row
+            if ((parseInt(this.round % 2) === 1 && chessEng >= 'a' && chessEng <= 'z')
+              || (parseInt(this.round % 2) === 0 && chessEng >= 'A' && chessEng <= 'Z')
+            ) {
+              chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+              this.drawSituation(chessCtx)
+              this.drawSelector(chessCtx, col, row)
+              this.checkedChess = chess
+              this.checkedX = col
+              this.checkedY = row
+              this.round ++
+            }
           }
         }
       }
@@ -171,7 +180,6 @@ class ChessBoard extends Component {
     ctx.lineTo(x2 + offsetX, y2 + offsetY)
     ctx.closePath()
     ctx.stroke()
-    
   }
 
   // 绘制“井”（兵林线和布置线上的点）
@@ -230,26 +238,21 @@ class ChessBoard extends Component {
 
   // 绘制一个棋子
   drawChess (ctx, x, y, color, chess) {
-    const { cellWidth, radius } = this
+    const { cellWidth, offsetX, offsetY, radius: r } = this
     const text = chess.name
-    this.drawCircle(ctx, x * cellWidth, y * cellWidth, radius, color, text) 
-  }
 
-  // 绘制一个圆
-  drawCircle (ctx, x, y, r, color, text) {
-    const { offsetX, offsetY } = this
+    x = x * cellWidth
+    y = y * cellWidth
+
     ctx.beginPath()
-    ctx.arc(offsetX + x, offsetY + y, r, 0, 2 * Math.PI, false)
+    ctx.arc(offsetX + x , offsetY + y, r, 0, 2 * Math.PI, false)
     ctx.closePath()
     ctx.lineStyle = color
     ctx.fillStyle = '#fff'
     ctx.fill()
-
-    if (text) {
-      ctx.font = '30px LiSu'
-      ctx.fillStyle = color
-      ctx.fillText(text , offsetX + x - 15, offsetY + y + 8)
-    }
+    ctx.font = '30px LiSu'
+    ctx.fillStyle = color
+    ctx.fillText(text , offsetX + x - 15, offsetY + y + 8)
     
     ctx.stroke()
   }

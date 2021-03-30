@@ -71,21 +71,35 @@ class ChessBoard extends Component {
 
       if (this.checkedChess) { // 已经有棋子被选中了，此时只能是落子或者切换棋子
         let key = record[this.checkedY][this.checkedX]
-        record[this.checkedY][this.checkedX] = '0'
-        record[row][col] = key
-        chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-        this.drawSituation(chessCtx)
-        this.drawSelector(chessCtx, col, row)
-        this.drawSelector(chessCtx, this.checkedX, this.checkedY)
         
-        this.checkedChess = null
+        if ((record[row][col] >= 'a' && record[row][col] <= 'z' && key >= 'a' && key <= 'z')
+          || (record[row][col] >= 'A' && record[row][col] <= 'Z' && key >= 'A' && key <= 'Z') // 切换茄子
+        ) {
+          this.checkedX = col
+          this.checkedY = row
+          console.log(this.checkedX, this.checkedY)
+          chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+          this.drawSituation(chessCtx)
+          this.drawSelector(chessCtx, col, row)
+          this.checkedChess = chessDictionary[record[this.checkedY][this.checkedX]]
+          console.log(this.checkedChess, record[this.checkedX][this.checkedY], this.checkedX, this.checkedY, record)
+        } else { // 落子
+          record[this.checkedY][this.checkedX] = '0'
+          record[row][col] = key
+          chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+          this.drawSituation(chessCtx)
+          this.drawSelector(chessCtx, col, row)
+          this.drawSelector(chessCtx, this.checkedX, this.checkedY)
+          
+          this.checkedChess = null
+        }
       } else { // 选棋子
         if (canvasCalculator.getDistancePow(point, minPoint) < Math.pow(this.radius, 2)) { // 落在圆形内
           const chessEng = record[row][col] // 棋子的英文编码
           const chess = chessDictionary[chessEng]
           if (chess !== undefined) {
-            if ((parseInt(this.round % 2) === 1 && chessEng >= 'a' && chessEng <= 'z')
-              || (parseInt(this.round % 2) === 0 && chessEng >= 'A' && chessEng <= 'Z')
+            if ((parseInt(this.round % 2) === 0 && chessEng >= 'a' && chessEng <= 'z')
+              || (parseInt(this.round % 2) === 1 && chessEng >= 'A' && chessEng <= 'Z')
             ) {
               chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
               this.drawSituation(chessCtx)

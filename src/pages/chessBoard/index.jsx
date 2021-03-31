@@ -296,6 +296,7 @@ class ChessBoard extends Component {
         this.checkedX = col
         this.checkedY = row
         this.round ++
+        console.log(chess.generateMove(col, row))
       }
     }
   }

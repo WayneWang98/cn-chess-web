@@ -1,4 +1,5 @@
 import * as canvasCalculator from './canvasCalculator'
+import * as chessUtils from './chess'
 
 // 获取canvas的像素比（devicePixelRatio / webkitBackingStorePixelRatio）
 export const getCanvasPixelRatio = (ctx) => {
@@ -12,5 +13,6 @@ export const getCanvasPixelRatio = (ctx) => {
 }
 
 export {
-  canvasCalculator
+  canvasCalculator,
+  chessUtils
 }

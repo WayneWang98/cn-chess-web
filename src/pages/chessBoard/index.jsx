@@ -89,6 +89,9 @@ class ChessBoard extends Component {
     const { radius: r, cellWidth } = this
     const x = col * cellWidth, y = row * cellWidth
 
+    ctx.strokeStyle = '#2774ce' 
+    ctx.lineWidth = 2
+
     this.drawLineInChessCanvas(ctx, x - r, y - r, x, y -r) // 左上
     this.drawLineInChessCanvas(ctx, x - r, y - r, x - r, y)
     this.drawLineInChessCanvas(ctx, x, y - r, x + r, y - r) // 右上
@@ -231,6 +234,8 @@ class ChessBoard extends Component {
     ctx.arc(offsetX + x , offsetY + y, r, 0, 2 * Math.PI, false)
     ctx.closePath()
     ctx.lineStyle = color
+    ctx.strokeStyle ='#000'
+    ctx.lineWidth = 2
     ctx.fillStyle = '#fff'
     ctx.fill()
     ctx.font = '30px LiSu'
@@ -296,9 +301,31 @@ class ChessBoard extends Component {
         this.checkedX = col
         this.checkedY = row
         this.round ++
-        console.log(chess.generateMove(col, row))
+        const moves = chess.generateMove(col, row)
+        this.drawCanMoveSites(chessCtx, moves)
       }
     }
+  }
+
+  // 绘制该棋子的所有可行点
+  drawCanMoveSites (ctx, moves) {
+    console.log(moves)
+    const { offsetX, offsetY, cellWidth } = this
+    moves.forEach((line, row) => {
+      line.forEach((site, col) => {
+        if (site === '1') {
+          console.log(row, col)
+          const x = col * cellWidth
+          const y = row * cellWidth
+          ctx.strokeStyle = '#78ce27'
+          ctx.lineWidth = 2
+          ctx.beginPath()
+          ctx.arc(offsetX + x , offsetY + y, 7, 0, 2 * Math.PI, false)
+          ctx.closePath()
+          ctx.stroke()
+        }
+      })
+    })
   }
 }
 

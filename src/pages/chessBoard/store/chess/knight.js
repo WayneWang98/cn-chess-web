@@ -6,6 +6,7 @@ import { isSameColor } from '../../../../utils/chess'
 export default class Knight extends Chess {
   constructor () {
     super ()
+    this.name = ''
   }
 
   // 生成走法

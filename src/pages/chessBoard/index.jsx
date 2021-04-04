@@ -277,7 +277,7 @@ class ChessBoard extends Component {
     this.drawSituation(chessCtx)
     this.drawSelector(chessCtx, x, y)
     this.checkedChess = chessDictionary[record[this.checkedY][this.checkedX]]
-    const moves = this.checkedChess.generateMove(this.checkedX, this.checkedY)
+    const moves = this.checkedChess.generateMoves(this.checkedX, this.checkedY, record)
     this.drawCanMoveSites(chessCtx, moves)
   }
 

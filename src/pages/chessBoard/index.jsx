@@ -41,7 +41,7 @@ class ChessBoard extends Component {
       let boardCtx = this.boardCtx = boardCanvas.getContext('2d')
       this.ratio = getCanvasPixelRatio(boardCtx) || 1 // 获取画布缩放比
       boardCtx.scale(this.ratio, this.ratio)
-      this.drawChessBoard(boardCtx)
+      this.drawChessBoard(boardCtx) // 绘制棋盘
     }
     let chessCtx
     if (chessCanvas.getContext) {
@@ -88,18 +88,26 @@ class ChessBoard extends Component {
   drawSelector (ctx, col, row) {
     const { radius: r, cellWidth } = this
     const x = col * cellWidth, y = row * cellWidth
+    let len = r / 2
 
     ctx.strokeStyle = '#2774ce' 
     ctx.lineWidth = 2
 
-    this.drawLineInChessCanvas(ctx, x - r, y - r, x, y -r) // 左上
-    this.drawLineInChessCanvas(ctx, x - r, y - r, x - r, y)
-    this.drawLineInChessCanvas(ctx, x, y - r, x + r, y - r) // 右上
-    this.drawLineInChessCanvas(ctx, x + r, y - r, x + r, y)
-    this.drawLineInChessCanvas(ctx, x- r, y, x - r, y + r) // 左下
-    this.drawLineInChessCanvas(ctx, x - r, y + r, x, y + r)
-    this.drawLineInChessCanvas(ctx, x, y + r, x + r, y + r) // 右下
-    this.drawLineInChessCanvas(ctx, x + r, y , x + r, y + r)
+    // 左上
+    this.drawLineInChessCanvas(ctx, x - r, y - r, x - r + len, y - r )
+    this.drawLineInChessCanvas(ctx, x - r, y - r, x - r, y - r + len)
+
+    // 右上
+    this.drawLineInChessCanvas(ctx, x + r - len, y - r, x + r, y - r)
+    this.drawLineInChessCanvas(ctx, x + r, y - r, x + r, y - r + len)
+
+    // 左下
+    this.drawLineInChessCanvas(ctx, x - r, y + r, x - r,  y + r - len)
+    this.drawLineInChessCanvas(ctx, x - r, y + r, x - r + len, y + r)
+
+    // 右下
+    this.drawLineInChessCanvas(ctx, x + r, y + r, x + r, y + r - len)
+    this.drawLineInChessCanvas(ctx, x + r, y + r, x + r - len, y + r)
   }
 
   // 画简单直线（在chessCanvas）
@@ -118,7 +126,7 @@ class ChessBoard extends Component {
     ctx.strokeStyle = '#211309' // 深褐色线条
     this.drawCellTable(ctx)
     this.drawPalaces(ctx)
-    this.drawSharSites(ctx)
+    this.drawSharpSites(ctx)
   }
 
   // 绘制格子表
@@ -169,7 +177,7 @@ class ChessBoard extends Component {
   }
 
   // 绘制“井”（兵林线和布置线上的点）
-  drawSharSites (ctx) {
+  drawSharpSites (ctx) {
     const { cellWidth } = this
     
     sharpSites.forEach((line, row) => {
@@ -269,6 +277,8 @@ class ChessBoard extends Component {
     this.drawSituation(chessCtx)
     this.drawSelector(chessCtx, x, y)
     this.checkedChess = chessDictionary[record[this.checkedY][this.checkedX]]
+    const moves = this.checkedChess.generateMove(this.checkedX, this.checkedY)
+    this.drawCanMoveSites(chessCtx, moves)
   }
 
   // 落子
@@ -301,7 +311,7 @@ class ChessBoard extends Component {
         this.checkedX = col
         this.checkedY = row
         this.round ++
-        const moves = chess.generateMove(col, row)
+        const moves = chess.generateMoves(col, row, record)
         this.drawCanMoveSites(chessCtx, moves)
       }
     }
@@ -309,20 +319,20 @@ class ChessBoard extends Component {
 
   // 绘制该棋子的所有可行点
   drawCanMoveSites (ctx, moves) {
-    console.log(moves)
     const { offsetX, offsetY, cellWidth } = this
     moves.forEach((line, row) => {
       line.forEach((site, col) => {
         if (site === '1') {
-          console.log(row, col)
           const x = col * cellWidth
           const y = row * cellWidth
           ctx.strokeStyle = '#78ce27'
           ctx.lineWidth = 2
+          ctx.fillStyle = '#fff'
           ctx.beginPath()
           ctx.arc(offsetX + x , offsetY + y, 7, 0, 2 * Math.PI, false)
           ctx.closePath()
           ctx.stroke()
+          ctx.fill()
         }
       })
     })

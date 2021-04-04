@@ -2,6 +2,7 @@ import Knight from './knight'
 import King from './king'
 import Advisor from './advisor'
 import Bishop from './bishop'
+import Rook from './rook'
 
 export const record = [ // 初始局面
   ['r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'],
@@ -49,7 +50,11 @@ export const chessDictionary = {
     }
   },
   'R': {
-    name: '車'
+    name: '車',
+    generateMoves (x, y, situation) {
+      const rook = new Rook()
+      return rook.generateMoves(x, y, situation)
+    }
   },
   'C': {
     name: '炮'
@@ -87,7 +92,11 @@ export const chessDictionary = {
     }
   },
   'r': {
-    name: '車'
+    name: '車',
+    generateMoves (x, y, situation) {
+      const rook = new Rook()
+      return rook.generateMoves(x, y, situation)
+    }
   },
   'c': {
     name: '炮'

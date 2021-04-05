@@ -31,6 +31,7 @@ class ChessBoard extends Component {
     this.checkedX = -1 // 选中的棋子的位置
     this.checkedY = -1
     this.round = 1 // 回合数
+    this.moves = null // 所有的可行点
   }
 
   componentDidMount () {
@@ -277,14 +278,18 @@ class ChessBoard extends Component {
     this.drawSituation(chessCtx)
     this.drawSelector(chessCtx, x, y)
     this.checkedChess = chessDictionary[record[this.checkedY][this.checkedX]]
-    const moves = this.checkedChess.generateMoves(this.checkedX, this.checkedY, record)
-    this.drawCanMoveSites(chessCtx, moves)
+    this.moves = this.checkedChess.generateMoves(this.checkedX, this.checkedY, record)
+    this.drawCanMoveSites(chessCtx, this.moves)
   }
 
   // 落子
   putChess (x, y) {
     const { cellWidth, chessCtx } = this
     
+    if (this.moves[y][x] === '0') { // 判断落点是否符合走子规则
+      return
+    }
+
     record[y][x] = record[this.checkedY][this.checkedX]
     record[this.checkedY][this.checkedX] = '0'
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
@@ -311,8 +316,8 @@ class ChessBoard extends Component {
         this.checkedX = col
         this.checkedY = row
         this.round ++
-        const moves = chess.generateMoves(col, row, record)
-        this.drawCanMoveSites(chessCtx, moves)
+        this.moves = chess.generateMoves(col, row, record)
+        this.drawCanMoveSites(chessCtx, this.moves)
       }
     }
   }

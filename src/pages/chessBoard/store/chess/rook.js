@@ -23,7 +23,6 @@ export default class Rook extends Chess {
       for (let j = 0; j < 10; j ++) { // 横车最多走8步，直车最多走9步
         col += direction[i].x
         row += direction[i].y
-        console.log(col, row)
         if (col < 0 || col > 8 || row < 0 || row > 9) { // 超出边界
           break
         }

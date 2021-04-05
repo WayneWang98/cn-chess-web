@@ -4,6 +4,7 @@ import Advisor from './advisor'
 import Bishop from './bishop'
 import Rook from './rook'
 import Cannon from './cannon'
+import Pawn from './pawn'
 
 export const record = [ // 初始局面
   ['r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'],
@@ -65,7 +66,11 @@ export const chessDictionary = {
     }
   },
   'P': {
-    name: '兵'
+    name: '兵',
+    generateMoves (x, y, situation) {
+      const pawn = new Pawn()
+      return pawn.generateMoves(x, y, situation)
+    }
   },
   // 黑方
   'k': {
@@ -111,6 +116,10 @@ export const chessDictionary = {
     }
   },
   'p': {
-    name: '卒'
+    name: '卒',
+    generateMoves (x, y, situation) {
+      const pawn = new Pawn()
+      return pawn.generateMoves(x, y, situation)
+    }
   },
 }

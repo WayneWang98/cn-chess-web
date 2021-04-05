@@ -12,6 +12,10 @@ export const getCanvasPixelRatio = (ctx) => {
     return (window.devicePixelRatio || 1) / backingStore
 }
 
+export const getStyle = (dom) => {
+  return window.getComputedStyle(dom, null)
+}
+
 export {
   canvasCalculator,
   chessUtils

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { sharpSites, record, chessDictionary } from './store'
-import { getCanvasPixelRatio, canvasCalculator, chessUtils } from '../../utils'
+import { getCanvasPixelRatio, getStyle, canvasCalculator, chessUtils } from '../../utils'
 
 class ChessBoard extends Component {
   render () {
@@ -38,9 +38,11 @@ class ChessBoard extends Component {
     /** @type {HTMLCanvasElement} */ 
     const boardCanvas = this.boardCanvas.current // 获取真实的canvas
     const chessCanvas = this.chessCanvas.current
+    
     if (boardCanvas.getContext) {
       let boardCtx = this.boardCtx = boardCanvas.getContext('2d')
       this.ratio = getCanvasPixelRatio(boardCtx) || 1 // 获取画布缩放比
+      this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
       boardCtx.scale(this.ratio, this.ratio)
       this.drawChessBoard(boardCtx) // 绘制棋盘
     }
@@ -48,6 +50,7 @@ class ChessBoard extends Component {
     if (chessCanvas.getContext) {
       chessCtx = this.chessCtx = chessCanvas.getContext('2d')
       chessCtx.scale(this.ratio, this.ratio)
+      console.log(this.ratio)
       this.drawSituation(chessCtx) // 绘制初始局面
     }
 
@@ -83,6 +86,22 @@ class ChessBoard extends Component {
         }
       }
     }
+  }
+
+  // 设置canvas的样式
+  setCanvasStyle () {
+    const boardCanvas = this.boardCanvas.current // 获取真实的canvas
+    const chessCanvas = this.chessCanvas.current
+    const boardStyle = getStyle(boardCanvas)
+
+    const width = parseInt(boardStyle.width.replace('px', ''))
+    const height = parseInt(boardStyle.height.replace('px', ''))
+
+    
+    boardCanvas.width = width * this.ratio
+    boardCanvas.height = height * this.ratio
+    chessCanvas.width = width * this.ratio
+    chessCanvas.height = height * this.ratio
   }
 
   // 绘制选中棋子的标志

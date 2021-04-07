@@ -37,5 +37,6 @@
   },
   "devDependencies": {
     "styled-components": "^5.2.1"
-  }
+  },
+  "homepage": "./"
 }

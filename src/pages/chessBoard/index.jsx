@@ -8,8 +8,8 @@ class ChessBoard extends Component {
     return (
       <div>
         <ChessBoardContainer>
-          <canvas className="boardCanvas" ref={this.boardCanvas} width="625" height="750"></canvas>
-          <canvas className="chessCanvas" ref={this.chessCanvas} width="625" height="750"></canvas>
+          <canvas className="boardCanvas" ref={this.boardCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
+          <canvas className="chessCanvas" ref={this.chessCanvas}></canvas>
         </ChessBoardContainer>
       </div>
     )
@@ -35,25 +35,10 @@ class ChessBoard extends Component {
   }
 
   componentDidMount () {
-    /** @type {HTMLCanvasElement} */ 
-    const boardCanvas = this.boardCanvas.current // 获取真实的canvas
-    const chessCanvas = this.chessCanvas.current
-    
-    if (boardCanvas.getContext) {
-      let boardCtx = this.boardCtx = boardCanvas.getContext('2d')
-      this.ratio = getCanvasPixelRatio(boardCtx) || 1 // 获取画布缩放比
-      this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
-      boardCtx.scale(this.ratio, this.ratio)
-      this.drawChessBoard(boardCtx) // 绘制棋盘
-    }
-    let chessCtx
-    if (chessCanvas.getContext) {
-      chessCtx = this.chessCtx = chessCanvas.getContext('2d')
-      chessCtx.scale(this.ratio, this.ratio)
-      console.log(this.ratio)
-      this.drawSituation(chessCtx) // 绘制初始局面
-    }
+    this.initCanvas()
+    this.initGames()
 
+    const chessCanvas = this.chessCanvas.current
     chessCanvas.onclick = (e) => {
       const { cellWidth }  = this
       const { offsetX, offsetY } = e
@@ -88,6 +73,24 @@ class ChessBoard extends Component {
     }
   }
 
+  // 初始化画布
+  initCanvas () {
+    this.boardCtx = this.boardCanvas.current.getContext('2d')
+    this.chessCtx = this.chessCanvas.current.getContext('2d')
+
+    let ratio = this.ratio = getCanvasPixelRatio(this.boardCtx) // 获取画布缩放比
+    this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
+    this.boardCtx.scale(ratio, ratio) // 根据缩放比设置画布缩放
+    this.chessCtx.scale(ratio, ratio)
+  }
+
+  // 初始化游戏
+  initGames () {
+    const { boardCtx, chessCtx } = this
+    this.drawChessBoard(boardCtx) // 绘制棋盘
+    this.drawSituation(chessCtx) // 绘制初始局面
+  }
+
   // 设置canvas的样式
   setCanvasStyle () {
     const boardCanvas = this.boardCanvas.current // 获取真实的canvas
@@ -97,11 +100,8 @@ class ChessBoard extends Component {
     const width = parseInt(boardStyle.width.replace('px', ''))
     const height = parseInt(boardStyle.height.replace('px', ''))
 
-    
-    boardCanvas.width = width * this.ratio
-    boardCanvas.height = height * this.ratio
-    chessCanvas.width = width * this.ratio
-    chessCanvas.height = height * this.ratio
+    chessCanvas.width = boardCanvas.width = width * this.ratio
+    chessCanvas.height = boardCanvas.height = height * this.ratio
   }
 
   // 绘制选中棋子的标志
@@ -344,14 +344,16 @@ class ChessBoard extends Component {
   // 绘制该棋子的所有可行点
   drawCanMoveSites (ctx, moves) {
     const { offsetX, offsetY, cellWidth } = this
+
+    ctx.strokeStyle = '#78ce27'
+    ctx.lineWidth = 2
+    ctx.fillStyle = '#fff'
+    
     moves.forEach((line, row) => {
       line.forEach((site, col) => {
         if (site === '1') {
           const x = col * cellWidth
           const y = row * cellWidth
-          ctx.strokeStyle = '#78ce27'
-          ctx.lineWidth = 2
-          ctx.fillStyle = '#fff'
           ctx.beginPath()
           ctx.arc(offsetX + x , offsetY + y, 7, 0, 2 * Math.PI, false)
           ctx.closePath()

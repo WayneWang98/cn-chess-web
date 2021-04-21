@@ -6,7 +6,7 @@ import Rook from './rook'
 import Cannon from './cannon'
 import Pawn from './pawn'
 
-export const record = [ // 初始局面
+const situation = [ // 初始局面
   ['r', 'n', 'b', 'a', 'k', 'a', 'b', 'n', 'r'],
   ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
   ['0', 'c', '0', '0', '0', '0', '0', 'c', '0'],
@@ -17,6 +17,10 @@ export const record = [ // 初始局面
   ['0', 'C', '0', '0', '0', '0', '0', 'C', '0'],
   ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
   ['R', 'N', 'B', 'A', 'K', 'A', 'B', 'N', 'R']
+]
+
+export const record = [ // 局面数组
+  situation
 ]
 
 // 象棋字典：采用国际象棋中FEN串的起名方法表示

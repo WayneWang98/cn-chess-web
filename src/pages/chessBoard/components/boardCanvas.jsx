@@ -6,7 +6,7 @@ export default class BoardCanvas extends Component {
   render () {
     return (
       <div>
-        <canvas className="boardCanvas" ref={this.boardCanvas} width="625" height="750"></canvas> 
+        <canvas className="boardCanvas" ref={this.boardCanvas}></canvas> 
       </div>
     )
   }
@@ -36,9 +36,21 @@ export default class BoardCanvas extends Component {
     this.boardCtx = this.boardCanvas.current.getContext('2d')
 
     let ratio = this.ratio = getCanvasPixelRatio(this.boardCtx) // 获取画布缩放比
-    // this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
+    this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
     this.boardCtx.scale(ratio, ratio) // 根据缩放比设置画布缩放
     this.drawChessBoard(this.boardCtx) // 绘制棋盘
+  }
+
+  // 设置canvas的样式
+  setCanvasStyle () {
+    const boardCanvas = this.boardCanvas.current
+    const style = getStyle(boardCanvas)
+
+    const width = parseInt(style.width.replace('px', ''))
+    const height = parseInt(style.height.replace('px', ''))
+
+    boardCanvas.width = width * this.ratio
+    boardCanvas.height = height * this.ratio
   }
 
    // 绘制棋盘

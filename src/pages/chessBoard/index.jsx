@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
-import { sharpSites, record, chessDictionary } from './store'
+import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, canvasCalculator, chessUtils } from '../../utils'
 import BoardCanvas from './components/boardCanvas'
 
@@ -12,6 +12,7 @@ class ChessBoard extends Component {
           <canvas className="chessCanvas" ref={this.chessCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
           <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
         </ChessBoardContainer>
+        <button onClick={this.repentance.bind(this)}>悔棋</button>
       </div>
     )
   }
@@ -27,10 +28,12 @@ class ChessBoard extends Component {
     this.radius = 22 // 棋子半径
     this.offsetX = 50 // 棋盘相对于画布的偏移量
     this.offsetY = 50
+    this.situation = JSON.parse(JSON.stringify(record[0])) // 当前局面，初始时为record[0]
+    this.record = record // 棋谱记录
     this.checkedChess = null // 被选中的棋子
     this.checkedX = -1 // 选中的棋子的位置
     this.checkedY = -1
-    this.round = 1 // 回合数
+    this.round = 0 // 回合数
     this.moves = null // 所有的可行点
   }
 
@@ -59,8 +62,8 @@ class ChessBoard extends Component {
       }
 
       if (this.checkedChess) { // 已经有棋子被选中了，此时只能是落子或者切换棋子
-        let key = record[this.checkedY][this.checkedX] // 选中的棋子
-        if (chessUtils.isSameColor(record[row][col], key)) { // 同色棋子，执行切换棋子的操作
+        let key = this.situation[this.checkedY][this.checkedX] // 选中的棋子
+        if (chessUtils.isSameColor(this.situation[row][col], key)) { // 同色棋子，执行切换棋子的操作
           this.switchChess(col, row)
         } else { // 落子
           this.putChess(col, row)
@@ -171,7 +174,7 @@ class ChessBoard extends Component {
 
   // 绘制一个完整的局面
   drawSituation (ctx) {
-    record.forEach((line, row) => {
+    this.situation.forEach((line, row) => {
       line.forEach((site, col) => {
         if (site !== '0') { // 该位置有棋子
           if (site >= 'a' && site <= 'z') { // 黑棋
@@ -192,8 +195,8 @@ class ChessBoard extends Component {
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
     this.drawSituation(chessCtx)
     this.drawSelector(chessCtx, x, y)
-    this.checkedChess = chessDictionary[record[this.checkedY][this.checkedX]]
-    this.moves = this.checkedChess.generateMoves(this.checkedX, this.checkedY, record)
+    this.checkedChess = chessDictionary[this.situation[this.checkedY][this.checkedX]]
+    this.moves = this.checkedChess.generateMoves(this.checkedX, this.checkedY, this.situation)
     this.drawCanMoveSites(chessCtx, this.moves)
   }
 
@@ -205,24 +208,28 @@ class ChessBoard extends Component {
       return
     }
 
-    record[y][x] = record[this.checkedY][this.checkedX]
-    record[this.checkedY][this.checkedX] = '0'
+    this.situation[y][x] = this.situation[this.checkedY][this.checkedX]
+    this.situation[this.checkedY][this.checkedX] = '0'
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
     this.drawSituation(chessCtx)
     this.drawSelector(chessCtx, x, y)
     this.drawSelector(chessCtx, this.checkedX, this.checkedY)
     this.checkedChess = null
+    this.round ++ // 落子后，回合数就增加了
+    
+    const copySituation = JSON.parse(JSON.stringify(this.situation)) // 每次落子后，将当前局面推入数组
+    this.record.push(copySituation)
   }
 
   // 拿起棋子（this.checked 从 false 变为 true）
   pickChess (col, row) {
     const { cellWidth, chessCtx } = this
-    const chessEng = record[row][col] // 棋子的英文编码
+    const chessEng = this.situation[row][col] // 棋子的英文编码
     const chess = chessDictionary[chessEng]
 
     if (chess !== undefined) {
-      if ((parseInt(this.round % 2) === 0 && chessUtils.isBlack(chessEng))
-        || (parseInt(this.round % 2) === 1 && chessUtils.isRed(chessEng))
+      if ((parseInt(this.round % 2) === 1 && chessUtils.isBlack(chessEng))
+        || (parseInt(this.round % 2) === 0 && chessUtils.isRed(chessEng))
       ) {
         chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
         this.drawSituation(chessCtx)
@@ -230,8 +237,7 @@ class ChessBoard extends Component {
         this.checkedChess = chess
         this.checkedX = col
         this.checkedY = row
-        this.round ++
-        this.moves = chess.generateMoves(col, row, record)
+        this.moves = chess.generateMoves(col, row, this.situation)
         this.drawCanMoveSites(chessCtx, this.moves)
       }
     }
@@ -258,6 +264,22 @@ class ChessBoard extends Component {
         }
       })
     })
+  }
+
+  // 悔棋
+  repentance () {
+    const { cellWidth, chessCtx } = this
+
+    if (this.round === 0) { // 第0回合，无法悔棋
+      return
+    }
+
+    this.record.pop() // 悔棋后，删除记录中的最后一个局面
+    this.situation = JSON.parse(JSON.stringify(this.record[this.record.length - 1])) // 取现在记录中的最后一个局面作为当前局面
+    
+    chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+    this.drawSituation(chessCtx)
+    this.round --
   }
 }
 

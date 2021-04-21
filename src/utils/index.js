@@ -16,6 +16,11 @@ export const getStyle = (dom) => {
   return window.getComputedStyle(dom, null)
 }
 
+// 通过JSON中的方法实现一些简单的深拷贝
+export const deepCloneByJSON = (obj) => {
+  return JSON.parse(JSON.stringify(obj))
+}
+
 export {
   canvasCalculator,
   chessUtils

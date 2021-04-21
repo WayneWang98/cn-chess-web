@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
-import { getCanvasPixelRatio, getStyle, canvasCalculator, chessUtils } from '../../utils'
+import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
 import BoardCanvas from './components/boardCanvas'
 
 class ChessBoard extends Component {
@@ -28,7 +28,7 @@ class ChessBoard extends Component {
     this.radius = 22 // 棋子半径
     this.offsetX = 50 // 棋盘相对于画布的偏移量
     this.offsetY = 50
-    this.situation = JSON.parse(JSON.stringify(record[0])) // 当前局面，初始时为record[0]
+    this.situation = deepCloneByJSON(record[0]) // 当前局面，初始时为record[0]
     this.record = record // 棋谱记录
     this.checkedChess = null // 被选中的棋子
     this.checkedX = -1 // 选中的棋子的位置
@@ -217,7 +217,7 @@ class ChessBoard extends Component {
     this.checkedChess = null
     this.round ++ // 落子后，回合数就增加了
     
-    const copySituation = JSON.parse(JSON.stringify(this.situation)) // 每次落子后，将当前局面推入数组
+    const copySituation = deepCloneByJSON(this.situation) // 每次落子后，将当前局面推入数组
     this.record.push(copySituation)
   }
 
@@ -275,7 +275,7 @@ class ChessBoard extends Component {
     }
 
     this.record.pop() // 悔棋后，删除记录中的最后一个局面
-    this.situation = JSON.parse(JSON.stringify(this.record[this.record.length - 1])) // 取现在记录中的最后一个局面作为当前局面
+    this.situation = deepCloneByJSON(this.record[this.record.length - 1]) // 取现在记录中的最后一个局面作为当前局面
     
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
     this.drawSituation(chessCtx)

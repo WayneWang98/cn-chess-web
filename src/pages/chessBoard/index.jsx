@@ -208,6 +208,7 @@ class ChessBoard extends Component {
       return
     }
 
+    this.writeOneRecord(x, y) // 记谱
     this.situation[y][x] = this.situation[this.checkedY][this.checkedX]
     this.situation[this.checkedY][this.checkedX] = '0'
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
@@ -219,6 +220,7 @@ class ChessBoard extends Component {
     
     const copySituation = deepCloneByJSON(this.situation) // 每次落子后，将当前局面推入数组
     this.record.push(copySituation)
+
   }
 
   // 拿起棋子（this.checked 从 false 变为 true）
@@ -280,6 +282,35 @@ class ChessBoard extends Component {
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
     this.drawSituation(chessCtx)
     this.round --
+  }
+
+  // 记谱
+  writeOneRecord (col, row) { // row和col为落子的横纵坐标
+    const { checkedX, checkedY } = this // 选中的棋子
+    const oldPoint = { x: checkedX, y: checkedY}
+    const newPoint = { x: col, y: row}
+    const inSameRowOrCol = canvasCalculator.inSameRowOrCol(oldPoint, newPoint)
+
+    const chess = this.situation[checkedY][checkedX]
+    const { name } = chessDictionary[chess]
+    if (inSameRowOrCol) { // 进/退/平
+      if (checkedX - col === 0) {
+        if (checkedY > row) { // 进
+          console.log(name + (col + 1 + '') + '进' + (checkedY - row))
+        } else { // 退
+          console.log(name + (col + 1 + '') + '退' + (row - checkedY))
+        }
+      } else { // 平
+        console.log(name + (checkedX + 1 + '') + '平' + (col + 1))
+      }
+
+    } else { // 进/退
+      if (checkedY > row) { // 进
+        console.log(name + (checkedX + 1 + '') + '进' + (col + 1))
+      } else { // 退
+        console.log(name + (checkedX + 1 + '') + '退' + (col + 1))
+      }
+    }
   }
 }
 

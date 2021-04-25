@@ -21,3 +21,14 @@ export const getMinDistancePoint = (point, arr) => {
   })
   return maxPoint    
 }
+
+// 判断两个点是否在同一水平/垂直方向
+export const inSameRowOrCol = (a, b) => {
+  const x1 = a.x, y1 = a.y
+  const x2 = b.x, y2 = b.y
+  
+  if (y1 - y2 === 0 || x1 - x2 === 0) {
+    return true
+  }
+  return false
+}

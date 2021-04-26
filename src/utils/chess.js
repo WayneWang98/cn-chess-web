@@ -12,3 +12,11 @@ export const isBlack = (name) => { // name: string
 export const isSameColor = (chess1, chess2) => {
  return (isRed(chess1) && isRed(chess2)) || (isBlack(chess1) && isBlack(chess2))
 }
+
+// 获取关于中心对称的棋子坐标
+export const getCentrosymmetricPoint = (point) => {
+  return { 
+    x: 8 - point.x,
+    y: 9 - point.y
+  }
+}

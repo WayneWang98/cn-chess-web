@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
+import { generateChessRecordText } from '../../helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
 
 class ChessBoard extends Component {
@@ -287,30 +288,21 @@ class ChessBoard extends Component {
   // 记谱
   writeOneRecord (col, row) { // row和col为落子的横纵坐标
     const { checkedX, checkedY } = this // 选中的棋子
-    const oldPoint = { x: checkedX, y: checkedY}
-    const newPoint = { x: col, y: row}
-    const inSameRowOrCol = canvasCalculator.inSameRowOrCol(oldPoint, newPoint)
+    let oldPoint = { x: checkedX, y: checkedY}
+    let newPoint = { x: col, y: row}
 
-    const chess = this.situation[checkedY][checkedX]
-    const { name } = chessDictionary[chess]
-    if (inSameRowOrCol) { // 进/退/平
-      if (checkedX - col === 0) {
-        if (checkedY > row) { // 进
-          console.log(name + (col + 1 + '') + '进' + (checkedY - row))
-        } else { // 退
-          console.log(name + (col + 1 + '') + '退' + (row - checkedY))
-        }
-      } else { // 平
-        console.log(name + (checkedX + 1 + '') + '平' + (col + 1))
-      }
+    const chessEng = this.situation[checkedY][checkedX]
+    const { name } = chessDictionary[chessEng]
 
-    } else { // 进/退
-      if (checkedY > row) { // 进
-        console.log(name + (checkedX + 1 + '') + '进' + (col + 1))
-      } else { // 退
-        console.log(name + (checkedX + 1 + '') + '退' + (col + 1))
-      }
+    if (chessUtils.isRed(chessEng)) { // 红方棋子，记谱时要做镜像翻转
+      oldPoint = chessUtils.getCentrosymmetricPoint(oldPoint)
+      newPoint = chessUtils.getCentrosymmetricPoint(newPoint)
     }
+
+    let recordText = generateChessRecordText(oldPoint, newPoint, name)
+    console.log(recordText)
+
+    
   }
 }
 

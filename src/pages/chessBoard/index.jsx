@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
-import { generateChessRecordText } from '../../helpers/recordHelper'
+import { generateChessRecordText, generateChessFullname } from '../../helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
 
 class ChessBoard extends Component {
@@ -299,7 +299,8 @@ class ChessBoard extends Component {
       newPoint = chessUtils.getCentrosymmetricPoint(newPoint)
     }
 
-    let recordText = generateChessRecordText(oldPoint, newPoint, name)
+    const fullname = generateChessFullname(name, oldPoint, this.situation)
+    let recordText = generateChessRecordText(oldPoint, newPoint, fullname)
     console.log(recordText)
 
     

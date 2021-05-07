@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
-import { generateChessRecordText } from '../../helpers/recordHelper'
+import { generateChessRecordText, generateChessFullname } from '../../helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
 
 class ChessBoard extends Component {
@@ -294,15 +294,16 @@ class ChessBoard extends Component {
     const chessEng = this.situation[checkedY][checkedX]
     const { name } = chessDictionary[chessEng]
 
+    let copySituation = this.situation
     if (chessUtils.isRed(chessEng)) { // 红方棋子，记谱时要做镜像翻转
       oldPoint = chessUtils.getCentrosymmetricPoint(oldPoint)
       newPoint = chessUtils.getCentrosymmetricPoint(newPoint)
+      copySituation = chessUtils.generateCentrosymmetricSituation(copySituation)
     }
 
-    let recordText = generateChessRecordText(oldPoint, newPoint, name)
+    const fullname = generateChessFullname(name, oldPoint, copySituation)
+    let recordText = generateChessRecordText(oldPoint, newPoint, fullname)
     console.log(recordText)
-
-    
   }
 }
 

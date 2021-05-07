@@ -294,16 +294,16 @@ class ChessBoard extends Component {
     const chessEng = this.situation[checkedY][checkedX]
     const { name } = chessDictionary[chessEng]
 
+    let copySituation = this.situation
     if (chessUtils.isRed(chessEng)) { // 红方棋子，记谱时要做镜像翻转
       oldPoint = chessUtils.getCentrosymmetricPoint(oldPoint)
       newPoint = chessUtils.getCentrosymmetricPoint(newPoint)
+      copySituation = chessUtils.generateCentrosymmetricSituation(copySituation)
     }
 
-    const fullname = generateChessFullname(name, oldPoint, this.situation)
+    const fullname = generateChessFullname(name, oldPoint, copySituation)
     let recordText = generateChessRecordText(oldPoint, newPoint, fullname)
     console.log(recordText)
-
-    
   }
 }
 

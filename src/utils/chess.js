@@ -1,3 +1,5 @@
+import { deepCloneByJSON } from './index'
+
 // 判断是否是红方棋子
 export const isRed = (name) => { // name: string
   return name >= 'A' && name <= 'Z'
@@ -19,4 +21,17 @@ export const getCentrosymmetricPoint = (point) => {
     x: 8 - point.x,
     y: 9 - point.y
   }
+}
+
+// 生成翻转棋盘局面
+export const generateCentrosymmetricSituation = (situation) => {
+  const copySiutation = deepCloneByJSON(situation)
+  for (let i = 0; i < 5; i ++) {
+    for (let j = 0; j < 9; j ++) {
+      const temp = copySiutation[i][j]
+      copySiutation[i][j] = copySiutation[9 - i][8 - j]
+      copySiutation[9 - i][8 - j] = temp
+    }
+  }
+  return copySiutation
 }

@@ -5,7 +5,7 @@ class Home extends Component {
   render () {
     return (
       <div>
-        <div>首页</div>
+        <div>象棋小游戏</div>
         <ChessBoard></ChessBoard>
       </div>
     )

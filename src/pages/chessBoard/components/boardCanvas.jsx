@@ -5,9 +5,7 @@ import { getCanvasPixelRatio, getStyle } from '../../../utils'
 export default class BoardCanvas extends Component {
   render () {
     return (
-      <div>
-        <canvas className="boardCanvas" ref={this.boardCanvas}></canvas> 
-      </div>
+      <canvas className="boardCanvas" ref={this.boardCanvas}></canvas> 
     )
   }
 

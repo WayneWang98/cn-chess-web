@@ -4,20 +4,9 @@ import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
 import { generateChessRecordText, generateChessFullname } from '../../helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
+import Record from './components/record'
 
 class ChessBoard extends Component {
-  render () {
-    return (
-      <div>
-        <ChessBoardContainer>
-          <canvas className="chessCanvas" ref={this.chessCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
-          <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
-        </ChessBoardContainer>
-        <button onClick={this.repentance.bind(this)}>悔棋</button>
-      </div>
-    )
-  }
-
   constructor () {
     super()
     
@@ -36,6 +25,23 @@ class ChessBoard extends Component {
     this.checkedY = -1
     this.round = 0 // 回合数
     this.moves = null // 所有的可行点
+
+    this.state = {
+      recordTextList: [] // 记谱（文字）列表
+    }
+  }
+
+  render () {
+    return (
+      <div>
+        <button onClick={this.repentance.bind(this)}>悔棋</button>
+        <ChessBoardContainer>
+          <canvas className="chessCanvas" ref={this.chessCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
+          <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
+        </ChessBoardContainer>
+        <Record recordList={this.state.recordTextList}></Record>
+      </div>
+    )
   }
 
   componentDidMount () {
@@ -272,12 +278,17 @@ class ChessBoard extends Component {
   // 悔棋
   repentance () {
     const { cellWidth, chessCtx } = this
+    const { recordTextList } = this.state
 
     if (this.round === 0) { // 第0回合，无法悔棋
       return
     }
 
     this.record.pop() // 悔棋后，删除记录中的最后一个局面
+    recordTextList.pop() // 清除这一步的记谱文本
+    this.setState({
+      recordTextList
+    })
     this.situation = deepCloneByJSON(this.record[this.record.length - 1]) // 取现在记录中的最后一个局面作为当前局面
     
     chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
@@ -303,7 +314,9 @@ class ChessBoard extends Component {
 
     const fullname = generateChessFullname(name, oldPoint, copySituation)
     let recordText = generateChessRecordText(oldPoint, newPoint, fullname)
-    console.log(recordText)
+    this.setState({
+      recordTextList: [...this.state.recordTextList, recordText]
+    })
   }
 }
 

@@ -1,7 +1,7 @@
 /* class--车 */
 import Chess from './chess'
-import { generateInitMove } from '../../../../helpers/chessHelper'
-import { isSameColor } from '../../../../utils/chess'
+import { generateInitMove } from '@/helpers/chessHelper'
+import { isSameColor } from '@/utils/chess'
 
 export default class Rook extends Chess {
   constructor () {

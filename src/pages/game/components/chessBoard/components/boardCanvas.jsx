@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { sharpSites } from '../store'
-import { getCanvasPixelRatio, getStyle } from '../../../utils'
+import { getCanvasPixelRatio, getStyle } from '@/utils'
 
 export default class BoardCanvas extends Component {
   render () {

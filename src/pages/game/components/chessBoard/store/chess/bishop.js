@@ -1,8 +1,8 @@
 /* “象”棋子类 */
 
 import Chess from './chess'
-import { generateInitMove } from '../../../../helpers/chessHelper'
-import { isSameColor } from '../../../../utils/chess'
+import { generateInitMove } from '@/helpers/chessHelper'
+import { isSameColor } from '@/utils/chess'
 
 export default class Bishop extends Chess {
   constructor () {

@@ -1,7 +1,7 @@
 /* class--卒 */
 import Chess from './chess'
-import { generateInitMove } from '../../../../helpers/chessHelper'
-import { isSameColor, isRed } from '../../../../utils/chess'
+import { generateInitMove } from '@/helpers/chessHelper'
+import { isSameColor, isRed } from '@/utils/chess'
 
 export default class Pawn extends Chess {
   constructor () {

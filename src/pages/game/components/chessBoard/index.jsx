@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
-import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '../../utils'
-import { generateChessRecordText, generateChessFullname } from '../../helpers/recordHelper'
+import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '@/utils'
+import { generateChessRecordText, generateChessFullname } from '@/helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
 import Record from './components/record'
 
@@ -46,7 +46,7 @@ class ChessBoard extends Component {
 
   componentDidMount () {
     this.initCanvas()
-    this.initGames()
+    this.initGame()
 
     const chessCanvas = this.chessCanvas.current
     chessCanvas.onclick = (e) => {
@@ -97,7 +97,7 @@ class ChessBoard extends Component {
   }
 
   // 初始化游戏
-  initGames () {
+  initGame () {
     const { chessCtx } = this
     this.initChessBoard()
     this.drawSituation(chessCtx) // 绘制初始局面

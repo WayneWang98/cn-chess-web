@@ -1,8 +1,10 @@
-import Chess from './chess'
-import { generateInitMove } from '../../../../helpers/chessHelper'
-import { isSameColor } from '../../../../utils/chess'
+/* “士”棋子类 */
 
-export default class King extends Chess {
+import Chess from './chess'
+import { generateInitMove } from '@/helpers/chessHelper'
+import { isSameColor } from '@/utils/chess'
+
+export default class Advisor extends Chess {
   constructor () {
     super()
     this.name = ''
@@ -11,13 +13,13 @@ export default class King extends Chess {
   // 生成走法
   generateMoves (x, y, situation) {
     const canMoveArray = generateInitMove()
-    const direction = [ // 将可以移动的方向
-      { x: +0, y: +1 },
-      { x: +1, y: +0 },
-      { x: +0, y: -1 },
-      { x: -1, y: +0 }
+    const direction = [ // 士可以移动的方向
+      { x: -1, y: -1 },
+      { x: +1, y: -1 },
+      { x: +1, y: +1 },
+      { x: -1, y: +1 }
     ]
-    const assist = [ // 辅助数组，用来判断将/帅是否位于九宫
+    const assist = [ // 辅助数组，用来判断棋子是否位于九宫
       ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
       ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
       ['0', '0', '0', '1', '1', '1', '0', '0', '0'],

@@ -1,13 +1,14 @@
 import React, { Component } from 'react'
 import ChessBoard from './components/chessBoard'
 
+import { GameContainer } from './style'
+
 export default class Game extends Component {
   render () {
     return (
-      <div>
-        <div>象棋小游戏</div>
+      <GameContainer>
         <ChessBoard></ChessBoard>
-      </div>
+      </GameContainer>
     )
   }
 }

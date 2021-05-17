@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ChessBoardContainer } from './style'
+import { CanvasContainer, ChessBoardContainer } from './style'
 import { record, chessDictionary } from './store'
 import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '@/utils'
 import { generateChessRecordText, generateChessFullname } from '@/helpers/recordHelper'
@@ -33,14 +33,14 @@ class ChessBoard extends Component {
 
   render () {
     return (
-      <div>
-        <button onClick={this.repentance.bind(this)}>悔棋</button>
-        <ChessBoardContainer>
+      <ChessBoardContainer>
+        <button className="retract-btn" onClick={this.repentance.bind(this)}>悔棋</button>
+        <CanvasContainer>
           <canvas className="chessCanvas" ref={this.chessCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
           <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
-        </ChessBoardContainer>
+        </CanvasContainer>
         <Record recordList={this.state.recordTextList}></Record>
-      </div>
+      </ChessBoardContainer>
     )
   }
 

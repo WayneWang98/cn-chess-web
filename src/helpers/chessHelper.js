@@ -15,3 +15,8 @@ export const generateInitMove = () => {
     ['0', '0', '0', '0', '0', '0', '0', '0', '0']
   ]
 }
+
+// 生成一个局面的所有走法
+export const generateAllMoves = (situation) => {
+  console.log(situation)
+}

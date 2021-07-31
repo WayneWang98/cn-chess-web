@@ -1,3 +1,5 @@
+/* 游戏区域 */
+
 import React, { Component } from 'react'
 import ChessBoard from './components/chessBoard'
 

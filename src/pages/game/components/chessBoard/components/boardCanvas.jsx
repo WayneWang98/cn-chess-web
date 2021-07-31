@@ -29,7 +29,7 @@ export default class BoardCanvas extends Component {
     this.initCanvas()
   }
 
-  初始化画布
+  // 初始化画布
   initCanvas () {
     this.boardCtx = this.boardCanvas.current.getContext('2d')
 

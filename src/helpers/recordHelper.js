@@ -29,7 +29,6 @@ export const generateChessFullname = (name, point , situation) => { // 棋子名
   const { x, y } = point
 
   for (let i = 0; i < situation.length; i ++) {
-    
     if (i !== y && situation[i][x] === situation[y][x]) { // 存在相同棋子在垂直方向的情况
       const isFirst = y > i
       return isFirst ? `前${name}` : `后${name}`

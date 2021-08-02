@@ -50,16 +50,16 @@ export const chessDictionary = {
   },
   'A': {
     name: '仕',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const advisor = new Advisor()
-      return advisor.generateMoves(x, y, situation)
+      return advisor.generateMoves(seq, situation)
     }
   },
   'B': {
     name: '相',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const bishop = new Bishop()
-      return bishop.generateMoves(x, y, situation)
+      return bishop.generateMoves(seq, situation)
     }
   },
   'N': {
@@ -101,16 +101,16 @@ export const chessDictionary = {
   },
   'a': {
     name: '士',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const advisor = new Advisor()
-      return advisor.generateMoves(x, y, situation)
+      return advisor.generateMoves(seq, situation)
     }
   },
   'b': {
     name: '象',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const bishop = new Bishop()
-      return bishop.generateMoves(x, y, situation)
+      return bishop.generateMoves(seq, situation)
     }
   },
   'n': {

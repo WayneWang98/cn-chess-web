@@ -310,14 +310,16 @@ class ChessBoard extends Component {
     const chessEng = numCharMap[this.situation[checkedSeq]]
     const { name } = chessDictionary[chessEng]
 
-    let copySituation = chessUtils.VBoardToRBoard(JSON.parse(JSON.stringify(this.situation)))
+    let copySituation = JSON.parse(JSON.stringify(this.situation))
 
     if (chessUtils.isRed(this.situation[checkedSeq])) { // 红方棋子，记谱时要做镜像翻转
-      oldPoint = chessUtils.getCentrosymmetricPoint(oldPoint)
-      newPoint = chessUtils.getCentrosymmetricPoint(newPoint)
+      oldPoint = chessUtils.getCentrosymmetricSite(oldPoint)
+      newPoint = chessUtils.getCentrosymmetricSite(newPoint)
       copySituation = chessUtils.generateCentrosymmetricSituation(copySituation)
     }
+    copySituation = chessUtils.VBoardToRBoard(copySituation)
 
+    // 处理为真正的棋盘上的坐标，供记谱函数使用
     oldPoint.x -= 3
     oldPoint.y -= 3
     newPoint.x -= 3

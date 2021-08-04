@@ -1,6 +1,6 @@
 import Chess from './chess'
 import { generateInitMove } from '@/helpers/chessHelper'
-import { isSameColor } from '@/utils/chess'
+import { isSameColor, isLegal } from '@/utils/chess'
 
 export default class King extends Chess {
   constructor () {
@@ -9,38 +9,44 @@ export default class King extends Chess {
   }
 
   // 生成走法
-  generateMoves (x, y, situation) {
+  generateMoves (seq, situation) {
     const canMoveArray = generateInitMove()
     const direction = [ // 将可以移动的方向
-      { x: +0, y: +1 },
-      { x: +1, y: +0 },
-      { x: +0, y: -1 },
-      { x: -1, y: +0 }
+      -0x10, // 上
+      +0x01, // 右
+      +0x10, // 下
+      -0x01 // 左
     ]
     const assist = [ // 辅助数组，用来判断将/帅是否位于九宫
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
-      ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
-      ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
-      ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
-      ['0', '0', '0', '0', '0', '0', '0', '0', '0'],
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0'],
-      ['0', '0', '0', '1', '1', '1', '0', '0', '0']
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ]
     for (let i = 0; i < direction.length; i ++) {
-      let col = x + direction[i].x, row = y + direction[i].y
-      if (col < 0 || col > 8 || row < 0 || row > 9) { // 超出边界
+      let newSeq = seq + direction[i]
+      if (!isLegal(newSeq)) { // 超出边界
         continue
       }
-      if (assist[row][col] !== '1') { // 超出九宫
+      if (assist[newSeq] !== 1) { // 超出九宫
         continue
       }
-      if (isSameColor(situation[row][col], situation[y][x])) { // 有本方棋子
+      if (isSameColor(situation[seq], situation[newSeq])) { // 有本方棋子
         continue
       }
-      canMoveArray[row][col] = '1'
+      canMoveArray[newSeq] = 1
     }
     return canMoveArray
   }

@@ -43,9 +43,9 @@ export const chessDictionary = {
   // 红方
   'K': {
     name: '帅',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const king = new King()
-      return king.generateMoves(x, y, situation)
+      return king.generateMoves(seq, situation)
     }
   },
   'A': {
@@ -65,9 +65,9 @@ export const chessDictionary = {
   'N': {
     name: '马',
     // 生成走法
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const knight = new Knight()
-      return knight.generateMoves(x, y, situation)
+      return knight.generateMoves(seq, situation)
     }
   },
   'R': {
@@ -94,9 +94,9 @@ export const chessDictionary = {
   // 黑方
   'k': {
     name: '将',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const king = new King()
-      return king.generateMoves(x, y, situation)
+      return king.generateMoves(seq, situation)
     }
   },
   'a': {
@@ -115,9 +115,9 @@ export const chessDictionary = {
   },
   'n': {
     name: '马',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const knight = new Knight()
-      return knight.generateMoves(x, y, situation)
+      return knight.generateMoves(seq, situation)
     }
   },
   'r': {

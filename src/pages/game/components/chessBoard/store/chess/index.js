@@ -79,9 +79,9 @@ export const chessDictionary = {
   },
   'C': {
     name: '炮',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const cannon = new Cannon()
-      return cannon.generateMoves(x, y, situation)
+      return cannon.generateMoves(seq, situation)
     }
   },
   'P': {
@@ -129,9 +129,9 @@ export const chessDictionary = {
   },
   'c': {
     name: '炮',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const cannon = new Cannon()
-      return cannon.generateMoves(x, y, situation)
+      return cannon.generateMoves(seq, situation)
     }
   },
   'p': {

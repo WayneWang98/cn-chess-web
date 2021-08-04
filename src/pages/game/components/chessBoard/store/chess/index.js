@@ -86,9 +86,9 @@ export const chessDictionary = {
   },
   'P': {
     name: '兵',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const pawn = new Pawn()
-      return pawn.generateMoves(x, y, situation)
+      return pawn.generateMoves(seq, situation)
     }
   },
   // 黑方
@@ -136,9 +136,9 @@ export const chessDictionary = {
   },
   'p': {
     name: '卒',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const pawn = new Pawn()
-      return pawn.generateMoves(x, y, situation)
+      return pawn.generateMoves(seq, situation)
     }
   },
 }

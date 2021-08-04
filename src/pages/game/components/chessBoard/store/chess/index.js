@@ -72,9 +72,9 @@ export const chessDictionary = {
   },
   'R': {
     name: '車',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const rook = new Rook()
-      return rook.generateMoves(x, y, situation)
+      return rook.generateMoves(seq, situation)
     }
   },
   'C': {
@@ -122,9 +122,9 @@ export const chessDictionary = {
   },
   'r': {
     name: '車',
-    generateMoves (x, y, situation) {
+    generateMoves (seq, situation) {
       const rook = new Rook()
-      return rook.generateMoves(x, y, situation)
+      return rook.generateMoves(seq, situation)
     }
   },
   'c': {

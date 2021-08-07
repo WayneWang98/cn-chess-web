@@ -1,7 +1,7 @@
 /* class--马 */
 import Chess from './chess'
 import { generateInitMove } from '@/helpers/chessHelper'
-import { isSameColor } from '@/utils/chess'
+import { isSameColor, isLegal } from '@/utils/chess'
 
 export default class Knight extends Chess {
   constructor () {
@@ -10,38 +10,38 @@ export default class Knight extends Chess {
   }
 
   // 生成走法
-  generateMoves (x, y, situation) { // 坐标和表示局面的二维数组
+  generateMoves (seq, situation) { // 坐标和表示局面的二维数组
     const canMoveArray = generateInitMove()
     const direction = [ // 马可以移动的方向
-      { x: -2, y: -1 },
-      { x: -2, y: +1 },
-      { x: -1, y: +2 },
-      { x: +1, y: +2 },
-      { x: +2, y: +1 },
-      { x: +2, y: -1 },
-      { x: +1, y: -2 },
-      { x: -1, y: -2 }
+      +0x0e,
+      -0x12,
+      -0x21,
+      -0x1f,
+      -0x0e,
+      +0x12,
+      +0x1f,
+      +0x21
     ] 
     const knightCheck = [ // 马脚的方向
-      { x: -1, y: +0 },
-      { x: -1, y: +0 },
-      { x: +0, y: +1 },
-      { x: +0, y: +1 },
-      { x: +1, y: +0 },
-      { x: +1, y: +0 },
-      { x: +0, y: -1 },
-      { x: +0, y: -1 }
+      -0x01,
+      -0x01,
+      -0x10,
+      -0x10,
+      +0x01,
+      +0x01,
+      +0x10,
+      +0x10
     ]
     for (let i = 0; i < direction.length; i ++) {
-      let col = x + direction[i].x, row = y + direction[i].y
-      if (col < 0 || col > 8 || row < 0 || row > 9) { // 超出边界
+      let newSeq = direction[i] + seq
+      if (!isLegal(newSeq)) { // 超出边界
         continue
       }
-      if (situation[y][x] !== '0' && isSameColor(situation[y][x], situation[row][col])) { // 是否有己方棋子
+      if (situation[newSeq] !== 0 && isSameColor(situation[seq], situation[newSeq])) { // 是否有己方棋子
         continue
       }
-      if (situation[y + knightCheck[i].y][x + knightCheck[i].x] === '0') { // 马腿检测
-        canMoveArray[row][col] = '1'
+      if (situation[seq + knightCheck[i]] === 0) { // 马腿检测
+        canMoveArray[newSeq] = 1
       }
     }
     return canMoveArray

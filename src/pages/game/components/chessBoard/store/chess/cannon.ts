@@ -1,16 +1,13 @@
 /* class--炮 */
 import Chess from './chess'
-import { generateInitMove } from '@/helpers/chessHelper'
-import { isSameColor, isLegal } from '@/utils/chess'
+import { generateInitMove } from 'src/helpers/chessHelper'
+import { isSameColor, isLegal } from 'src/utils/chess'
+import { VirtualBoardSituation } from 'src/types/types'
 
 export default class Cannon extends Chess {
-  constructor () {
-    super ()
-    this.name = ''
-  }
 
   // 生成走法
-  generateMoves (seq, situation) { // 坐标和表示局面的二维数组
+  generateMoves (seq: number, situation: VirtualBoardSituation) { // 坐标和表示局面的二维数组
     const canMoveArray = generateInitMove()
     const direction = [ // 炮移动一步的方向
       - 0x01,

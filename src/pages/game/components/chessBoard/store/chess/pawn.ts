@@ -1,16 +1,12 @@
 /* class--卒 */
 import Chess from './chess'
-import { generateInitMove } from '@/helpers/chessHelper'
-import { isSameColor, isRed, isLegal } from '@/utils/chess'
+import { generateInitMove } from 'src/helpers/chessHelper'
+import { isSameColor, isRed, isLegal } from 'src/utils/chess'
+import { VirtualBoardSituation } from 'src/types/types'
 
 export default class Pawn extends Chess {
-  constructor () {
-    super ()
-    this.name = ''
-  }
-
   // 生成走法
-  generateMoves (seq, situation) { // 坐标和表示局面的二维数组
+  generateMoves (seq: number, situation: VirtualBoardSituation) { // 坐标和表示局面的二维数组
     const canMoveArray = generateInitMove()
     const direction = [ // 卒移动的方向
       [ // 红色方行棋方向

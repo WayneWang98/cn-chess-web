@@ -1,17 +1,13 @@
 /* “士”棋子类 */
 
 import Chess from './chess'
-import { generateInitMove } from '@/helpers/chessHelper'
-import { isSameColor, isLegal } from '@/utils/chess'
+import { generateInitMove } from 'src/helpers/chessHelper'
+import { isSameColor, isLegal } from 'src/utils/chess'
+import { VirtualBoardSituation } from 'src/types/types'
 
 export default class Advisor extends Chess {
-  constructor () {
-    super()
-    this.name = ''
-  }
-
-  // 生成走法
-  generateMoves (seq, situation) {
+  // // 生成走法
+  generateMoves (seq: number, situation: VirtualBoardSituation) {
     const canMoveArray = generateInitMove()
     const direction = [ // 士可以移动的方向
       -0x11, // 左上

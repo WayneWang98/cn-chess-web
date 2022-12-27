@@ -1,24 +1,22 @@
 import React, { Component } from 'react'
 import { sharpSites } from '../store'
-import { getCanvasPixelRatio, getStyle } from '@/utils'
+import { getCanvasPixelRatio, getStyle } from 'src/utils'
 
-export default class BoardCanvas extends Component {
-  render () {
-    return (
-      <canvas className="boardCanvas" ref={this.boardCanvas}></canvas> 
-    )
-  }
+type BoardCanvasProps = {
+  onRef: (ref: any) => void
+}
 
-  constructor () {
-    super()
-    this.boardCanvas = React.createRef() // 棋盘画布
-    this.boardCtx = null // 棋盘画布的上下文
-    this.cellWidth = 50 // 单元格的大小
-    this.offsetX = 50
-    this.offsetY = 50
-    this.sharpSize = this.cellWidth / 4 // 棋盘“#”符号的大小
-    this.ratio =  1 // 画布缩放比
-  }
+type BoardCanvasState = {}
+
+export default class BoardCanvas extends Component<BoardCanvasProps, BoardCanvasState> {
+
+  private boardCanvasRef = React.createRef<HTMLCanvasElement>() // 棋盘画布
+  private boardCtx: CanvasRenderingContext2D | null = null // 棋盘画布的上下文
+  private cellWidth: number = 50 // 单元格的大小
+  private offsetX: number = 50
+  private offsetY: number = 50
+  private sharpSize: number = this.cellWidth / 4 // 棋盘“#”符号的大小
+  private ratio: number =  1 // 画布缩放比
 
   componentDidMount () {
     this.props.onRef(this)
@@ -31,9 +29,12 @@ export default class BoardCanvas extends Component {
 
   // 初始化画布
   initCanvas () {
-    this.boardCtx = this.boardCanvas.current.getContext('2d')
+    if (!this.boardCanvasRef?.current) return
+    this.boardCtx = this.boardCanvasRef.current.getContext('2d')
 
+    if (!this.boardCtx) return
     let ratio = this.ratio = getCanvasPixelRatio(this.boardCtx) // 获取画布缩放比
+    console.log('ratio: ', ratio)
     this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
     this.boardCtx.scale(ratio, ratio) // 根据缩放比设置画布缩放
     this.drawChessBoard(this.boardCtx) // 绘制棋盘
@@ -41,18 +42,19 @@ export default class BoardCanvas extends Component {
 
   // 设置canvas的样式
   setCanvasStyle () {
-    const boardCanvas = this.boardCanvas.current
-    const style = getStyle(boardCanvas)
+    const boardCanvasRef = this.boardCanvasRef.current
+    if (!boardCanvasRef) return
+    const style = getStyle(boardCanvasRef)
 
     const width = parseInt(style.width.replace('px', ''))
     const height = parseInt(style.height.replace('px', ''))
 
-    boardCanvas.width = width * this.ratio
-    boardCanvas.height = height * this.ratio
+    boardCanvasRef.width = width * this.ratio
+    boardCanvasRef.height = height * this.ratio
   }
 
    // 绘制棋盘
-   drawChessBoard (ctx) {
+   drawChessBoard (ctx: CanvasRenderingContext2D) {
     ctx.lineWidth = 2
     ctx.strokeStyle = '#211309' // 深褐色线条
     this.drawCellTable(ctx)
@@ -61,7 +63,7 @@ export default class BoardCanvas extends Component {
   }
 
   // 绘制格子表
-  drawCellTable (ctx) {
+  drawCellTable (ctx: CanvasRenderingContext2D) {
     const { cellWidth, offsetX, offsetY } = this
     const width = cellWidth * 8
     const height = cellWidth * 9
@@ -98,7 +100,7 @@ export default class BoardCanvas extends Component {
   }
 
   // 画简单直线
-  drawLineInBoard (ctx, x1, y1, x2, y2) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
+  drawLineInBoard (ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
     const { offsetX, offsetY } = this
     ctx.beginPath()
     ctx.moveTo(x1 + offsetX, y1 + offsetY)
@@ -108,7 +110,7 @@ export default class BoardCanvas extends Component {
   }
 
   // 绘制“井”（兵林线和布置线上的点）
-  drawSharpSites (ctx) {
+  drawSharpSites (ctx: CanvasRenderingContext2D) {
     const { cellWidth } = this
     
     sharpSites.forEach((line, row) => {
@@ -130,9 +132,9 @@ export default class BoardCanvas extends Component {
   }
 
   // 以某个点为中心，绘制左“#”
-  drawLeftSharp (ctx, x, y) {
+  drawLeftSharp (ctx: CanvasRenderingContext2D, x: number, y: number) {
     const { sharpSize } = this
-    const gap = parseInt(sharpSize / 2)
+    const gap = Math.floor(sharpSize / 2)
 
     this.drawLineInBoard(ctx, x - gap, y - gap, x - gap, y - sharpSize)
     this.drawLineInBoard(ctx, x - gap, y - gap, x - sharpSize, y - gap)
@@ -141,9 +143,9 @@ export default class BoardCanvas extends Component {
   }
 
   // 以某个点为中心，绘制右“#”
-  drawRightSharp (ctx, x, y) {
+  drawRightSharp (ctx: CanvasRenderingContext2D, x: number, y: number) {
     const { sharpSize } = this
-    const gap = parseInt(sharpSize / 2)
+    const gap = Math.floor(sharpSize / 2)
     
     this.drawLineInBoard(ctx, x + gap, y + gap, x + sharpSize, y + gap)
     this.drawLineInBoard(ctx, x + gap, y + gap, x + gap, y + sharpSize)
@@ -152,13 +154,19 @@ export default class BoardCanvas extends Component {
   }
 
   // 绘制九宫
-  drawPalaces (ctx) {
+  drawPalaces (ctx: CanvasRenderingContext2D) {
     const { cellWidth } = this
 
     this.drawLineInBoard(ctx, 3 * cellWidth, 0, 5 * cellWidth, 2 * cellWidth)
     this.drawLineInBoard(ctx, 3 * cellWidth, 2 * cellWidth, 5 * cellWidth, 0)
     this.drawLineInBoard(ctx, 3 * cellWidth, 7 * cellWidth, 5 * cellWidth, 9 * cellWidth)
     this.drawLineInBoard(ctx, 3 * cellWidth, 9 * cellWidth, 5 * cellWidth, 7 * cellWidth)
+  }
+
+  render () {
+    return (
+      <canvas className="boardCanvas" ref={this.boardCanvasRef}></canvas> 
+    )
   }
 
 }

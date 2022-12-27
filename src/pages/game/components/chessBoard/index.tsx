@@ -1,61 +1,56 @@
-import React, { Component } from 'react'
+import React, { Component, RefObject } from 'react'
 import { CanvasContainer, ChessBoardContainer } from './style'
-import { record, chessDictionary, numCharMap } from './store'
-import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from '@/utils'
-import { generateChessRecordText, generateChessFullname } from '@/helpers/recordHelper'
+import { record } from './store'
+import { getCanvasPixelRatio, getStyle, deepCloneByJSON, canvasCalculator, chessUtils } from 'src/utils'
+import { generateChessRecordText, generateChessFullname } from 'src/helpers/recordHelper'
 import BoardCanvas from './components/boardCanvas'
-import Record from './components/record'
+import RecordHistory from './components/recordHistory'
+import { Moves, RecordList, VirtualBoardSituation } from 'src/types/types'
+import { ChessDictionaryItem, getChessByValue } from './store/chess'
 
-class ChessBoard extends Component {
-  constructor () {
-    super()
+type ChessBoardProps = {}
+type ChessBoardState = {
+  recordTextList: RecordList
+}
+
+class ChessBoard extends Component<ChessBoardProps, ChessBoardState> {
+  private boardCanvasRef = React.createRef<BoardCanvas>() // 棋盘画布
+  private chessCanvasRef = React.createRef<HTMLCanvasElement>() // 棋子画布
+  private ratio: number = 1 // 棋盘比例
+  private chessCanvasCtx: CanvasRenderingContext2D | null = null // 棋子画布的上下文
+  private cellWidth = 50 // 单元格的大小
+  private offsetX = 50 // 棋盘相对于画布的偏移量
+  private offsetY = 50
+  private radius = 22 // 棋子半径
+  private situation: VirtualBoardSituation = deepCloneByJSON(record[0]) // 当前局面，初始时为record[0]
+  private record = record // 棋谱记录
+  private checkedChess: ChessDictionaryItem | null = null // 被选中的棋子
+  private checkedX = -1 // 选中的棋子的位置
+  private checkedY = -1
+  private round = 0 // 回合数
+  private moves: Moves | null = null // 所有的可行点
+
+  constructor (props: ChessBoardProps) {
+    super(props)
     
-    this.boardCanvas = null // 棋盘画布
-    this.chessCanvas = React.createRef() // 棋子画布
-    this.ratio = 1
-    this.chessCtx = null // 棋子画布的上下文
-    this.cellWidth = 50 // 单元格的大小
-    this.radius = 22 // 棋子半径
-    this.offsetX = 50 // 棋盘相对于画布的偏移量
-    this.offsetY = 50
-    this.situation = deepCloneByJSON(record[0]) // 当前局面，初始时为record[0]
-    this.record = record // 棋谱记录
-    this.checkedChess = null // 被选中的棋子
-    this.checkedX = -1 // 选中的棋子的位置
-    this.checkedY = -1
-    this.round = 0 // 回合数
-    this.moves = null // 所有的可行点
-
     this.state = {
-      recordTextList: [] // 记谱（文字）列表
+      recordTextList: []
     }
-  }
-
-  render () {
-    return (
-      <ChessBoardContainer>
-        <button className="retract-btn" onClick={this.repentance.bind(this)}>悔棋</button>
-        <CanvasContainer>
-          <canvas className="chessCanvas" ref={this.chessCanvas}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
-          <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
-        </CanvasContainer>
-        <Record recordList={this.state.recordTextList}></Record>
-      </ChessBoardContainer>
-    )
   }
 
   componentDidMount () {
     this.initCanvas()
     this.initGame()
 
-    const chessCanvas = this.chessCanvas.current
-    chessCanvas.onclick = (e) => {
+    const chessCanvas = this.chessCanvasRef.current
+
+    chessCanvas?.addEventListener('click', (e: MouseEvent) => {
       const { cellWidth }  = this
       const { offsetX, offsetY } = e
       const point = { x: offsetX, y: offsetY}
 
-      const x = parseInt(offsetX / cellWidth) * cellWidth // 放大
-      const y = parseInt(offsetY / cellWidth) * cellWidth
+      const x = Math.floor(offsetX / cellWidth) * cellWidth // 放大
+      const y = Math.floor(offsetY / cellWidth) * cellWidth
       
       const A1 = { x: x, y: y }
       const A2 = { x: x + cellWidth, y: y }
@@ -63,6 +58,7 @@ class ChessBoard extends Component {
       const B2 = { x: x + cellWidth, y: y + cellWidth }
 
       let minPoint = canvasCalculator.getMinDistancePoint(point, [A1, A2, B1, B2])
+      if (!minPoint) return
       const col = minPoint.x / cellWidth + 2, row = minPoint.y / cellWidth + 2
       const seq = chessUtils.coordXY(col, row)
       if (!chessUtils.isLegal(seq)) { // 在棋盘不合法范围内
@@ -81,37 +77,42 @@ class ChessBoard extends Component {
           this.pickChess(col, row)
         }
       }
-    }
+    })
   }
 
-  onRef (ref) {
-    this.boardCanvas = ref
+  onRef (ref: RefObject<BoardCanvas>) {
+    console.log('onRef: ', ref)
+    this.boardCanvasRef = ref
   }
 
   // 初始化画布
   initCanvas () {
-    this.chessCtx = this.chessCanvas.current.getContext('2d')
+    this.chessCanvasCtx = this.chessCanvasRef?.current?.getContext('2d') ?? null
+    if (!this.chessCanvasCtx) return
 
-    let ratio = this.ratio = getCanvasPixelRatio(this.chessCtx) // 获取画布缩放比
+    let ratio = this.ratio = getCanvasPixelRatio(this.chessCanvasCtx) // 获取画布缩放比
     this.setCanvasStyle() // 根据样式宽高动态设置canvas宽高
-    this.chessCtx.scale(ratio, ratio) // 根据缩放比设置画布缩放
+    this.chessCanvasCtx?.scale(ratio, ratio) // 根据缩放比设置画布缩放
   }
 
   // 初始化游戏
   initGame () {
-    const { chessCtx } = this
+    const { chessCanvasCtx } = this
+    if (!chessCanvasCtx) return
     this.initChessBoard()
-    this.drawSituation(chessCtx) // 绘制初始局面
+    this.drawSituation(chessCanvasCtx) // 绘制初始局面
   }
 
   // 初始化棋盘
   initChessBoard () {
-    this.boardCanvas.initBoard()
+    console.log('init Chess board: ', this.boardCanvasRef)
+    this.boardCanvasRef.initBoard() // todo
   }
 
   // 设置canvas的样式
   setCanvasStyle () {
-    const chessCanvas = this.chessCanvas.current
+    const chessCanvas = this.chessCanvasRef.current
+    if (!chessCanvas) return
     const style = getStyle(chessCanvas)
 
     const width = parseInt(style.width.replace('px', ''))
@@ -122,7 +123,7 @@ class ChessBoard extends Component {
   }
 
   // 绘制选中棋子的标志
-  drawSelector (ctx, col, row) {
+  drawSelector (ctx: CanvasRenderingContext2D, col: number, row: number) {
     const { radius: r, cellWidth } = this
     const x = col * cellWidth, y = row * cellWidth
     let len = r / 2
@@ -148,7 +149,7 @@ class ChessBoard extends Component {
   }
 
   // 画简单直线（在chessCanvas）
-  drawLineInChessCanvas (ctx, x1, y1, x2, y2) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
+  drawLineInChessCanvas (ctx: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) { // 参数中的坐标相对棋盘定位，而不是相对画布定位
     const { offsetX, offsetY } = this
     ctx.beginPath()
     ctx.moveTo(x1 + offsetX, y1 + offsetY)
@@ -158,7 +159,7 @@ class ChessBoard extends Component {
   }
 
   // 绘制一个棋子
-  drawChess (ctx, x, y, color, chess) {
+  drawChess (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, chess: ChessDictionaryItem) {
     const { cellWidth, offsetX, offsetY, radius: r } = this
     const text = chess.name
 
@@ -168,7 +169,7 @@ class ChessBoard extends Component {
     ctx.beginPath()
     ctx.arc(offsetX + x , offsetY + y, r, 0, 2 * Math.PI, false)
     ctx.closePath()
-    ctx.lineStyle = color
+    // ctx.lineStyle = color
     ctx.strokeStyle ='#000'
     ctx.lineWidth = 2
     ctx.fillStyle = '#fff'
@@ -181,52 +182,58 @@ class ChessBoard extends Component {
   }
 
   // 绘制一个完整的局面
-  drawSituation (ctx) {
+  drawSituation (ctx: CanvasRenderingContext2D | null) {
+    if (!ctx) return
     this.situation.forEach((item, k) => {
       const x = chessUtils.fileX(k)
       const y = chessUtils.rankY(k)
-      const chess = this.situation[k]
-      if (chess !== 0) { // 该位置有棋子
-        if ((chess & 16) === 16) { // 红方棋子
-          this.drawChess(ctx, x - 3, y - 3, 'red', chessDictionary[numCharMap[chess]])
+      const chessSeq = this.situation[k]
+      const chess = getChessByValue(chessSeq)
+      if (chessSeq !== 0 && chess) { // 该位置有棋子
+        if ((chessSeq & 16) === 16) { // 红方棋子
+          this.drawChess(ctx, x - 3, y - 3, 'red', chess)
         } else { // 黑方棋子
-          this.drawChess(ctx, x - 3, y - 3, 'black', chessDictionary[numCharMap[chess]])
+          this.drawChess(ctx, x - 3, y - 3, 'black', chess)
         }
       }
     })
   }
 
   // 执行切换棋子的操作
-  switchChess (x, y) { // x，y为棋子的落点
-    const { cellWidth, chessCtx } = this
+  switchChess (x: number, y: number) { // x，y为棋子的落点
+    const { cellWidth, chessCanvasCtx } = this
+    if (!chessCanvasCtx) return
     this.checkedX = x
     this.checkedY = y
     const checkedSeq = chessUtils.coordXY(x, y)
-    chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-    this.drawSituation(chessCtx)
-    this.drawSelector(chessCtx, x - 3, y - 3)
-    this.checkedChess = chessDictionary[numCharMap[this.situation[checkedSeq]]]
-    this.moves = this.checkedChess.generateMoves(checkedSeq, this.situation)
-    this.drawCanMoveSites(chessCtx, this.moves)
+    chessCanvasCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+    this.drawSituation(chessCanvasCtx)
+    this.drawSelector(chessCanvasCtx, x - 3, y - 3)
+    // this.checkedChess = chessDictionary[numCharMap[this.situation[checkedSeq]]]
+    this.checkedChess = getChessByValue(checkedSeq);
+    this.moves = this.checkedChess?.generateMoves(checkedSeq, this.situation) ?? null
+    this.drawCanMoveSites(chessCanvasCtx, this.moves)
   }
 
   // 落子
-  putChess (x, y) {
-    const { cellWidth, chessCtx } = this
+  putChess (x: number, y: number) {
+    const { cellWidth, chessCanvasCtx } = this
     const seq = chessUtils.coordXY(x, y)
     const checkedSeq = chessUtils.coordXY(this.checkedX, this.checkedY)
+
+    if (!chessCanvasCtx) return
     
-    if (this.moves[seq] === 0) { // 判断落点是否符合走子规则
+    if (this.moves![seq] === 0) { // 判断落点是否符合走子规则
       return
     }
 
     this.writeOneRecord(x, y) // 记谱
     this.situation[seq] = this.situation[checkedSeq]
     this.situation[checkedSeq] = 0
-    chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-    this.drawSituation(chessCtx)
-    this.drawSelector(chessCtx, x - 3, y - 3)
-    this.drawSelector(chessCtx, this.checkedX - 3, this.checkedY - 3)
+    chessCanvasCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+    this.drawSituation(chessCanvasCtx)
+    this.drawSelector(chessCanvasCtx, x - 3, y - 3)
+    this.drawSelector(chessCanvasCtx, this.checkedX - 3, this.checkedY - 3)
     this.checkedChess = null
     this.round ++ // 落子后，回合数就增加了
     
@@ -235,31 +242,32 @@ class ChessBoard extends Component {
   }
 
   // 拿起棋子（this.checked 从 false 变为 true）
-  pickChess (col, row) {
-    const { cellWidth, chessCtx } = this
+  pickChess (col: number, row: number) {
+    const { cellWidth, chessCanvasCtx } = this
     const chessSeq = chessUtils.coordXY(col, row)
     const chessValue = this.situation[chessSeq]
-    const chessEng = numCharMap[chessValue] // 棋子的英文编码
-    const chess = chessDictionary[chessEng]
+    const chess = getChessByValue(chessValue)
 
-    if (chess !== undefined) {
-      if ((parseInt(this.round % 2) === 1 && chessUtils.isBlack(chessValue))
-        || (parseInt(this.round % 2) === 0 && chessUtils.isRed(chessValue))
+    if (chess !== null) {
+      if ((Math.floor(this.round % 2) === 1 && chessUtils.isBlack(chessValue))
+        || (Math.floor(this.round % 2) === 0 && chessUtils.isRed(chessValue))
       ) {
-        chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-        this.drawSituation(chessCtx)
-        this.drawSelector(chessCtx, col - 3, row - 3)
+        if (!chessCanvasCtx) return
+        chessCanvasCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+        this.drawSituation(chessCanvasCtx)
+        this.drawSelector(chessCanvasCtx, col - 3, row - 3)
         this.checkedChess = chess
         this.checkedX = col
         this.checkedY = row
         this.moves = chess.generateMoves(chessSeq, this.situation)
-        this.drawCanMoveSites(chessCtx, this.moves)
+        this.drawCanMoveSites(chessCanvasCtx, this.moves)
       }
     }
   }
 
   // 绘制该棋子的所有可行点
-  drawCanMoveSites (ctx, moves) {
+  drawCanMoveSites (ctx: CanvasRenderingContext2D, moves: Moves | null) {
+    if (!moves) return
     const { offsetX, offsetY, cellWidth } = this
 
     ctx.strokeStyle = '#78ce27'
@@ -281,7 +289,7 @@ class ChessBoard extends Component {
 
   // 悔棋
   repentance () {
-    const { cellWidth, chessCtx } = this
+    const { cellWidth, chessCanvasCtx } = this
     const { recordTextList } = this.state
 
     if (this.round === 0) { // 第0回合，无法悔棋
@@ -295,20 +303,22 @@ class ChessBoard extends Component {
     })
     this.situation = deepCloneByJSON(this.record[this.record.length - 1]) // 取现在记录中的最后一个局面作为当前局面
     
-    chessCtx.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
-    this.drawSituation(chessCtx)
+    chessCanvasCtx?.clearRect(0, 0, 10 * cellWidth, 11 * cellWidth)
+    this.drawSituation(chessCanvasCtx)
     this.round --
   }
 
   // 记谱
-  writeOneRecord (col, row) { // row和col为落子的横纵坐标
+  writeOneRecord (col: number, row: number) { // row和col为落子的横纵坐标
     const { checkedX, checkedY } = this // 选中的棋子
     const checkedSeq = chessUtils.coordXY(checkedX, checkedY)
+    const checkedValue = this.situation[checkedSeq]
     let oldPoint = { x: checkedX, y: checkedY }
     let newPoint = { x: col, y: row }
 
-    const chessEng = numCharMap[this.situation[checkedSeq]]
-    const { name } = chessDictionary[chessEng]
+    const chess = getChessByValue(checkedValue)
+    if (!chess) return
+    const { name } = chess
 
     let copySituation = JSON.parse(JSON.stringify(this.situation))
 
@@ -330,6 +340,19 @@ class ChessBoard extends Component {
     this.setState({
       recordTextList: [...this.state.recordTextList, recordText]
     })
+  }
+
+  render () {
+    return (
+      <ChessBoardContainer>
+        <button className="retract-btn" onClick={this.repentance.bind(this)}>悔棋</button>
+        <CanvasContainer>
+          <canvas className="chessCanvas" ref={this.chessCanvasRef}></canvas> {/* boardCanvas与chessCanvas的大小始终保持一致 */}
+          <BoardCanvas onRef={this.onRef.bind(this)}></BoardCanvas>
+        </CanvasContainer>
+        <RecordHistory recordList={this.state.recordTextList} />
+      </ChessBoardContainer>
+    )
   }
 }
 

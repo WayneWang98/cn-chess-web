@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Game from '@/pages/game'
+import Game from 'src/pages/game'
 
 class Home extends Component {
   render () {

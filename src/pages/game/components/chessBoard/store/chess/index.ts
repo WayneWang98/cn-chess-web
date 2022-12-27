@@ -5,6 +5,30 @@ import Bishop from './bishop'
 import Rook from './rook'
 import Cannon from './cannon'
 import Pawn from './pawn'
+import { Moves, VirtualBoardSituation } from 'src/types/types'
+
+enum ChessKey {
+  K = 'K',
+  A = 'A',
+  B = 'B',
+  N = 'N',
+  R = 'R',
+  C = 'C',
+  P = 'P',
+  k = 'k',
+  a = 'a',
+  b = 'b',
+  n = 'n',
+  r = 'r',
+  c = 'c',
+  p = 'p',
+}
+
+export type ChessDictionaryItem = {
+  name: string
+  generateMoves: (seq: number, situation: VirtualBoardSituation) => Moves
+}
+
 
 const situation = [ // 16 * 16 的矩阵表示初始局面
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -26,7 +50,7 @@ const situation = [ // 16 * 16 的矩阵表示初始局面
 ]
 
 // 数字与棋子字母的映射
-export const numCharMap = [
+export const numCharMap: (string | number)[] = [
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 'K', 'A', 'A', 'B',
   'B', 'N', 'N', 'R', 'R', 'C', 'C', 'P', 'P', 'P',
@@ -38,8 +62,20 @@ export const record = [ // 局面数组
   situation
 ]
 
+// 根据situation数组中的值获取chess
+export const getChessByValue = (value: number) => {
+  const key = numCharMap[value]
+  if (key === 0) {
+    return null
+  } else {
+    return chessDictionary[key as ChessKey]  // todo: determine the type of key
+  }
+}
+
 // 象棋字典：采用国际象棋中FEN串的起名方法表示
-export const chessDictionary = {
+export const chessDictionary: {
+  [key in ChessKey]: ChessDictionaryItem
+} = {
   // 红方
   'K': {
     name: '帅',
